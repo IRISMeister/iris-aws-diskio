@@ -7,7 +7,9 @@
 |m4.xlarge|	4|	16|	EBS のみ|	750|	高|
 |i3.xlarge|	4|	30.5|	EBS,1 x 950 NVMe SSD|表記なし,850?|	ベース 1.25Gbps,バースト帯域幅 10Gbps |
 
-> Provisioningは[こちら](https://github.com/IRISMeister/AWSIRISDeployment)を使用して自動化している。  
+使用O/S: ami-windows-latest/Windows_Server-2019-Japanese-Full-Base  
+
+> Provisioningは[こちら](https://github.com/IRISMeister/AWSIRISDeployment)の[MirrorNode_Windows.yam](https://github.com/IRISMeister/AWSIRISDeployment/blob/master/MirrorNode_Windows.yaml)使用して自動化している。  
 > 特に断りがなければ、計測にはm4.xlargeを使用している。
 
 EBS 最適化インスタンスの諸元値
