@@ -1,0 +1,38 @@
+randr: (g=0): rw=randread, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=windowsaio, iodepth=1
+...
+fio-3.30
+Starting 8 threads
+randr: Laying out IO file (1 file / 1024MiB)
+randr: Laying out IO file (1 file / 1024MiB)
+randr: Laying out IO file (1 file / 1024MiB)
+randr: Laying out IO file (1 file / 1024MiB)
+randr: Laying out IO file (1 file / 1024MiB)
+randr: Laying out IO file (1 file / 1024MiB)
+randr: Laying out IO file (1 file / 1024MiB)
+randr: Laying out IO file (1 file / 1024MiB)
+
+randr: (groupid=0, jobs=8): err= 0: pid=6916: Fri Apr 8 12:55:26 2022
+  read: IOPS=6063, BW=47.4MiB/s (49.7MB/s)(8192MiB/172946msec)
+    slat (usec): min=7, max=349485, avg=16.12, stdev=591.05
+    clat (nsec): min=800, max=35064k, avg=1275654.02, stdev=500333.17
+     lat (usec): min=241, max=349486, avg=1291.78, stdev=772.55
+    clat percentiles (usec):
+     |  1.00th=[  515],  5.00th=[  709], 10.00th=[  791], 20.00th=[  906],
+     | 30.00th=[  996], 40.00th=[ 1090], 50.00th=[ 1188], 60.00th=[ 1319],
+     | 70.00th=[ 1467], 80.00th=[ 1631], 90.00th=[ 1827], 95.00th=[ 1975],
+     | 99.00th=[ 2638], 99.50th=[ 3228], 99.90th=[ 4752], 99.95th=[ 6063],
+     | 99.99th=[12518]
+   bw (  KiB/s): min=30918, max=80954, per=100.00%, avg=49443.12, stdev=466.18, samples=2707
+   iops        : min= 5830, max= 9802, avg=6169.06, stdev=47.86, samples=1352
+  lat (nsec)   : 1000=0.01%
+  lat (usec)   : 2=0.01%, 250=0.01%, 500=0.89%, 750=6.11%, 1000=23.36%
+  lat (msec)   : 2=65.43%, 4=3.99%, 10=0.19%, 20=0.02%, 50=0.01%
+  cpu          : usr=0.00%, sys=0.00%, ctx=0, majf=0, minf=0
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=1048576,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=1
+
+Run status group 0 (all jobs):
+   READ: bw=47.4MiB/s (49.7MB/s), 47.4MiB/s-47.4MiB/s (49.7MB/s-49.7MB/s), io=8192MiB (8590MB), run=172946-172946msec

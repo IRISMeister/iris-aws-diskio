@@ -1,0 +1,35 @@
+write: (g=0): rw=write, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=windowsaio, iodepth=1
+...
+fio-3.30
+Starting 8 threads
+write: Laying out IO file (1 file / 1024MiB)
+write: Laying out IO file (1 file / 1024MiB)
+write: Laying out IO file (1 file / 1024MiB)
+write: Laying out IO file (1 file / 1024MiB)
+
+write: (groupid=0, jobs=8): err= 0: pid=5468: Fri Apr 8 13:27:05 2022
+  write: IOPS=6135, BW=47.9MiB/s (50.3MB/s)(8192MiB/170898msec); 0 zone resets
+    slat (usec): min=9, max=24494, avg=651.08, stdev=679.73
+    clat (nsec): min=300, max=18907k, avg=641550.42, stdev=654086.91
+     lat (usec): min=469, max=24506, avg=1292.63, stdev=314.90
+    clat percentiles (usec):
+     |  1.00th=[   10],  5.00th=[   15], 10.00th=[   15], 20.00th=[   16],
+     | 30.00th=[   16], 40.00th=[   18], 50.00th=[  474], 60.00th=[ 1172],
+     | 70.00th=[ 1237], 80.00th=[ 1303], 90.00th=[ 1369], 95.00th=[ 1418],
+     | 99.00th=[ 1565], 99.50th=[ 1713], 99.90th=[ 2999], 99.95th=[ 5080],
+     | 99.99th=[ 8029]
+   bw (  KiB/s): min=46097, max=86624, per=100.00%, avg=49440.88, stdev=478.27, samples=2708
+   iops        : min= 5941, max=10791, avg=6174.57, stdev=56.64, samples=1352
+  lat (nsec)   : 500=0.01%, 750=0.09%, 1000=0.12%
+  lat (usec)   : 2=0.07%, 4=0.08%, 10=0.65%, 20=45.46%, 50=1.92%
+  lat (usec)   : 100=1.60%, 250=0.01%, 500=0.01%, 750=1.35%, 1000=1.33%
+  lat (msec)   : 2=47.03%, 4=0.21%, 10=0.07%, 20=0.01%
+  cpu          : usr=0.00%, sys=0.22%, ctx=0, majf=0, minf=0
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=0,1048576,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=1
+
+Run status group 0 (all jobs):
+  WRITE: bw=47.9MiB/s (50.3MB/s), 47.9MiB/s-47.9MiB/s (50.3MB/s-50.3MB/s), io=8192MiB (8590MB), run=170898-170898msec

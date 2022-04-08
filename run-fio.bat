@@ -1,0 +1,12 @@
+fio --name=read --iodepth=1 --rw=read --bs=8k --direct=1 --size=1g --numjobs=1 --thread -group_reporting --iopsavgtime=1000 > read-1.txt
+fio --name=read --iodepth=1 --rw=read --bs=8k --direct=1 --size=1g --numjobs=2 --thread -group_reporting --iopsavgtime=1000 > read-2.txt
+fio --name=read --iodepth=1 --rw=read --bs=8k --direct=1 --size=1g --numjobs=4 --thread -group_reporting --iopsavgtime=1000 > read-4.txt
+fio --name=read --iodepth=4 --rw=read --bs=8k --direct=1 --size=1g --numjobs=1 --thread -group_reporting --iopsavgtime=1000 > read-1-4.txt
+fio --name=read --iodepth=1 --rw=read --bs=8k --direct=1 --size=1g --numjobs=8 --thread -group_reporting --iopsavgtime=1000 > read-8.txt
+fio --name=write --iodepth=1 --rw=write --bs=8k --direct=1 --size=1g --numjobs=1 --thread -group_reporting --iopsavgtime=1000 > write-1.txt
+fio --name=write --iodepth=1 --rw=write --bs=8k --direct=1 --size=1g --numjobs=1 --thread -group_reporting --iopsavgtime=1000 > write-2.txt
+fio --name=write --iodepth=1 --rw=write --bs=8k --direct=1 --size=1g --numjobs=4 --thread -group_reporting --iopsavgtime=1000 > write-4.txt
+fio --name=write --iodepth=4 --rw=write --bs=8k --direct=1 --size=1g --numjobs=1 --thread -group_reporting --iopsavgtime=1000 > write-1-4.txt
+fio --name=write --iodepth=1 --rw=write --bs=8k --direct=1 --size=1g --numjobs=8 --thread -group_reporting --iopsavgtime=1000 > write-8.txt
+fio --name=randw --iodepth=1 --rw=randwrite --bs=8k --direct=1 --size=1g --numjobs=8 --thread -group_reporting --iopsavgtime=1000 > rndwrite-8.txt
+fio --name=randr --iodepth=1 --rw=randread --bs=8k --direct=1 --size=1g --numjobs=8 --thread -group_reporting --iopsavgtime=1000 > rndread-8.txt

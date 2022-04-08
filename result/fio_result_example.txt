@@ -1,0 +1,41 @@
+N:\>fio --name=read --iodepth=1 --rw=read --bs=8k --direct=1 --size=5g --numjobs=8 --thread -group_reporting --iopsavgtime=1000
+read: (g=0): rw=read, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=windowsaio, iodepth=1
+...
+fio-3.29
+Starting 8 threads
+read: Laying out IO file (1 file / 5120MiB)
+read: Laying out IO file (1 file / 5120MiB)
+read: Laying out IO file (1 file / 5120MiB)
+read: Laying out IO file (1 file / 5120MiB)
+read: Laying out IO file (1 file / 5120MiB)
+read: Laying out IO file (1 file / 5120MiB)
+read: Laying out IO file (1 file / 5120MiB)
+read: Laying out IO file (1 file / 5120MiB)
+Jobs: 1 (f=0): [_(7),f(1)][100.0%][r=74.8MiB/s][r=9571 IOPS][eta 00m:00s]
+read: (groupid=0, jobs=8): err= 0: pid=5016: Wed Apr 6 12:10:59 2022 
+  read: IOPS=49.0k, BW=383MiB/s (402MB/s)(40.0GiB/106973msec)  <== この出力を記録する
+    slat (usec): min=6, max=931506, avg=16.25, stdev=406.89
+    clat (nsec): min=310, max=991678k, avg=141625.11, stdev=613099.87
+     lat (usec): min=70, max=999325, avg=157.87, stdev=737.73
+    clat percentiles (usec):
+     |  1.00th=[  101],  5.00th=[  112], 10.00th=[  117], 20.00th=[  123],
+     | 30.00th=[  127], 40.00th=[  131], 50.00th=[  137], 60.00th=[  141],
+     | 70.00th=[  147], 80.00th=[  159], 90.00th=[  178], 95.00th=[  194],
+     | 99.00th=[  219], 99.50th=[  231], 99.90th=[  262], 99.95th=[  273],
+     | 99.99th=[  310]
+   bw (  KiB/s): min=59514, max=428835, per=100.00%, avg=401464.96, stdev=3218.99, samples=1663
+   iops        : min= 3756, max=51447, avg=49905.58, stdev=578.29, samples=832 <== 個々のジョブの結果をgroupingしたもの。バラツキが知りたければこちら
+  lat (nsec)   : 500=0.01%, 750=0.01%, 1000=0.01%
+  lat (usec)   : 2=0.01%, 4=0.01%, 10=0.01%, 20=0.01%, 50=0.02%
+  lat (usec)   : 100=0.78%, 250=99.03%, 500=0.17%, 750=0.01%, 1000=0.01%
+  lat (msec)   : 2=0.01%, 4=0.01%, 10=0.01%, 20=0.01%, 1000=0.01%
+  cpu          : usr=0.94%, sys=6.94%, ctx=0, majf=0, minf=0
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=5242880,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=1
+
+Run status group 0 (all jobs):
+   READ: bw=383MiB/s (402MB/s), 383MiB/s-383MiB/s (402MB/s-402MB/s), io=40.0GiB (42.9GB), run=106973-106973msec
+
