@@ -30,7 +30,7 @@ EBS 最適化インスタンスの諸元値
 > Linuxに関するドキュメントから抜粋。Windowsに関しては発見できず。同じか？  
 > ネットワークと異なり、SSD I/Oについてはバーストは無い模様。
 
-IOPSが6,000を超えることもある。
+計測ツールでIOPSが6,000を超えることもあるが、通常の振る舞い。
 >サイズの小さな I/O 操作では、インスタンス内で測定した IOPS がプロビジョニングの値より高くなることがあります。この状況は、インスタンスのオペレーティングシステムが、小さな I/O 操作を Amazon EBS に渡す前に、大きな操作にマージした場合に生じます。  
 https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ebs-io-characteristics.html
 
@@ -470,12 +470,11 @@ DBGP3M>s max=$O(^data1(""),-1) F i=1:1:max { k data s l=$C($R(27)+1+$A("a")) s $
 
 ## IRISのI/O動作を観察する方法
 
-[IRISのディスクI/Oの概要](https://docs.intersystems.com/iris20211/csp/docbookj/DocBook.UI.Page.cls?KEY=GCI_prepare_install#GCI_storage_config
+IRISが発生するI/O負荷については、[IRISのディスクI/Oの概要](https://docs.intersystems.com/iris20211/csp/docbookj/DocBook.UI.Page.cls?KEY=GCI_prepare_install#GCI_storage_config
 )を参照。  
-> 1+8個の計9個のWrire Daemonが協調動作するような記述があるが、Windows版ではWrire Daemonは1個のみです。
+> 1+8個の計9個のWrire Daemonが協調動作するような記述があるが、Windows版ではWrire Daemonは1個のみ。
 
-下記は、データベースの書き込み、WIJ書き込みを行うWrire Daemonの動作をモニタする方法。
-
+下記は、データベースの書き込み、WIJ書き込みを行うWrire Daemonの動作を観察する方法。
 
 ### irisstat
 
@@ -574,11 +573,23 @@ Date,       Time    ,  Glorefs, GRratio,  PhyRds, Gloupds, Rourefs,  PhyWrs,   W
 
 ### procmon
 
-sysinternalsのprocmonでWite Daemonを監視すると、さらに細かいI/O動作を観察できる。  
+sysinternalsのprocmonでWrite Daemon(下記の例ではPID:6388)を監視すると、さらに細かいI/O動作を観察できる。
+
+```
+Time of Day	Process Name	PID	Operation	Path	Result	Detail
+12:23:34.964	irisdb.exe	6388	WriteFile	G:\work\DB1G\IRIS.DAT	SUCCESS	Offset: 8,192, Length: 16,384, Priority: Normal
+12:23:34.964	irisdb.exe	6388	WriteFile	G:\work\DB1G\IRIS.DAT	SUCCESS	Offset: 376,832, Length: 24,576, Priority: Normal
+12:23:34.964	irisdb.exe	6388	WriteFile	G:\work\DB1G\IRIS.DAT	SUCCESS	Offset: 720,896, Length: 483,328, Priority: Normal
+12:23:34.965	irisdb.exe	6388	WriteFile	G:\work\DB1G\IRIS.DAT	SUCCESS	Offset: 1,204,224, Length: 524,288, Priority: Normal
+12:23:34.966	irisdb.exe	6388	WriteFile	G:\work\DB1G\IRIS.DAT	SUCCESS	Offset: 1,728,512, Length: 524,288, Priority: Normal
+12:23:34.966	irisdb.exe	6388	WriteFile	G:\work\DB1G\IRIS.DAT	SUCCESS	Offset: 2,252,800, Length: 524,288, Priority: Normal
+12:23:34.967	irisdb.exe	6388	WriteFile	G:\work\DB1G\IRIS.DAT	SUCCESS	Offset: 2,777,088, Length: 524,288, Priority: Normal
+```
+
 
 シーケーンシャルWRITEの場合、WIJへの書き込みよりDATへの書き込みサイズのほうが大きくなる。 
 ```
-DBGP3>s $P(data,"a",256)="a" D DISABLE^%NOJRN f i=1:1:35339790 s ^a(i)=$LISTBUILD(i,data)
+DBGP3>k data s $P(data,"a",256)="a" D DISABLE^%NOJRN f i=1:1:35339790 s ^a(i)=$LISTBUILD(i,data)
 <FILEFULL> ^a(34030920),i:\dbgp3\
 DBGP3>
 主なWIJ への書き込みサイズ: 258,048
