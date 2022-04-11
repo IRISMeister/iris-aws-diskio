@@ -30,6 +30,10 @@ EBS 最適化インスタンスの諸元値
 > Linuxに関するドキュメントから抜粋。Windowsに関しては発見できず。同じか？  
 > ネットワークと異なり、SSD I/Oについてはバーストは無い模様。
 
+IOPSが6,000を超えることもある。
+>サイズの小さな I/O 操作では、インスタンス内で測定した IOPS がプロビジョニングの値より高くなることがあります。この状況は、インスタンスのオペレーティングシステムが、小さな I/O 操作を Amazon EBS に渡す前に、大きな操作にマージした場合に生じます。  
+https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ebs-io-characteristics.html
+
 
 EBSの諸元値
 |ボリュームタイプ|ボリュームあたりの最大 IOPS (16 KiB I/O)|ボリュームあたりの最大スループット|
@@ -44,7 +48,6 @@ https://aws.amazon.com/jp/ec2/instance-types/
 https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/storage-optimized-instances.html  
 https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ebs-volume-types.html  
 https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ebs-optimized.html  
-
 
 ## 使用DISKデバイスについて
 
@@ -233,7 +236,7 @@ Lドライブ(GP2)
 |read|4|1|6353|49.6||
 |read|1|8|6127|47.9||
 
-> read 1ジョブの結果がなぜか期待値の倍くらいになっている。結果は[こちら](result/gp2/read-1.txt)。GP2は単一プロセスによる書き込みに"強い"のかもしれない。  
+> 結果は[こちら](result/gp2/read-1.txt)。read 1ジョブの結果が2,4に比べて相対的に高い値になっている。GP2は単一プロセスによる書き込みに"強い"のかもしれない。  
 > m4.xlargeの最大スループットは93.75 MB/sなので、帯域の頭打ちは観測されていない。  
 
 Iドライブ(GP3)
@@ -440,8 +443,7 @@ DBGP3M>s max=$O(^data1(""),-1) F i=1:1:max { k data s l=$C($R(27)+1+$A("a")) s $
 | M | DAT |122.3|15.7|11387|1361||
 
 ランダムアクセスになったため、DATのIOPSが大幅に増加したのは予想通り。
-IOPS上限値の6000を超えたのは想定外。  
-スループットが微増したのは予想外。ブロックの新規割り当てコストが大きいのか。サイズが不変(ブロックの再編成が起こらない)であることも要因と思われるので、それを試すためにCASE 4を実施。
+ランダムアクセスでIOPS上限値の6000を超えたり、スループットが微増したのは予想外。ブロックの新規割り当てコストが大きいのか。サイズが不変(ブロックの再編成が起こらない)であることも要因と思われるので、それを試すためにCASE 4を実施。
 
 CASE 2) シーケンシャルWRITEのCASE 2あるいは3の実施後に実施する。サイズが大きく変わるランダムアクセスの更新を行う。
 
@@ -467,6 +469,13 @@ DBGP3M>s max=$O(^data1(""),-1) F i=1:1:max { k data s l=$C($R(27)+1+$A("a")) s $
 
 
 ## IRISのI/O動作を観察する方法
+
+[IRISのディスクI/Oの概要](https://docs.intersystems.com/iris20211/csp/docbookj/DocBook.UI.Page.cls?KEY=GCI_prepare_install#GCI_storage_config
+)を参照。  
+> 1+8個の計9個のWrire Daemonが協調動作するような記述があるが、Windows版ではWrire Daemonは1個のみです。
+
+下記は、データベースの書き込み、WIJ書き込みを行うWrire Daemonの動作をモニタする方法。
+
 
 ### irisstat
 
@@ -501,8 +510,8 @@ sysinternalsのprocmonを使えば実際には64 Blockのまとめ書きが大�
 Processでirisdb#1(Write Daemon)を指定してIO Write operations/secやIO Write Bytes/secカウンタを使用するとWDの動作(WIJ,DATへの書き込み)状況が観測できる。
 > WDはDATやWIJの読み込みはしない  
 
-これらを共にプロットすると、画像のような出力となる。WDがWIJを書き込んだ(赤線だけの区間)後に、DATへの書き込みを行っている様子を観測できる。
-WIJ更新完了後の、DATの更新中は(WIJはこの期間には更新されないため)上記2つのカウンタ値は一致する(赤線と青線が重なる区間)。
+これらを共にプロットすると、画像のような出力となる。WDがWIJを書き込んだ(赤線だけの区間)後に、DATへの書き込みを行っている様子([2フェーズライト](https://docs.intersystems.com/iris20211/csp/docbookj/DocBook.UI.Page.cls?KEY=GCDI_wij#GCDI_wij_twophase))を観測できる。WIJ更新完了後の、DATの更新中は(WIJはこの期間には更新されないため)上記2つのカウンタ値は一致する(赤線と青線が重なる区間)。
+> WIJへの書き込みは連続領域なので低IOPS、IRIS.DATへの書き込みは(一般的に)ランダムな領域なので高IOPSとなる。  
 
 ![perfmon](perfmon.png)
 
