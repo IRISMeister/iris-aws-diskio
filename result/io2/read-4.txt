@@ -1,0 +1,31 @@
+read: (g=0): rw=read, bs=(R) 8192B-8192B, (W) 8192B-8192B, (T) 8192B-8192B, ioengine=windowsaio, iodepth=1
+...
+fio-3.30
+Starting 4 threads
+read: Laying out IO file (1 file / 1024MiB)
+read: Laying out IO file (1 file / 1024MiB)
+
+read: (groupid=0, jobs=4): err= 0: pid=7496: Wed Apr 13 12:11:29 2022
+  read: IOPS=5159, BW=40.3MiB/s (42.3MB/s)(4096MiB/101621msec)
+    slat (usec): min=8, max=394, avg=16.98, stdev= 3.66
+    clat (usec): min=107, max=7897, avg=606.12, stdev=192.20
+     lat (usec): min=145, max=7913, avg=623.09, stdev=191.78
+    clat percentiles (usec):
+     |  1.00th=[  180],  5.00th=[  310], 10.00th=[  445], 20.00th=[  469],
+     | 30.00th=[  486], 40.00th=[  529], 50.00th=[  603], 60.00th=[  635],
+     | 70.00th=[  652], 80.00th=[  734], 90.00th=[  889], 95.00th=[  963],
+     | 99.00th=[ 1057], 99.50th=[ 1106], 99.90th=[ 1450], 99.95th=[ 1745],
+     | 99.99th=[ 2704]
+   bw (  KiB/s): min=46549, max=104894, per=100.00%, avg=52104.17, stdev=2492.34, samples=653
+   iops        : min= 5876, max=12199, avg=6508.57, stdev=311.31, samples=325
+  lat (usec)   : 250=4.34%, 500=31.32%, 750=44.99%, 1000=16.49%
+  lat (msec)   : 2=2.83%, 4=0.03%, 10=0.01%
+  cpu          : usr=0.00%, sys=0.00%, ctx=0, majf=0, minf=0
+  IO depths    : 1=100.0%, 2=0.0%, 4=0.0%, 8=0.0%, 16=0.0%, 32=0.0%, >=64=0.0%
+     submit    : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     complete  : 0=0.0%, 4=100.0%, 8=0.0%, 16=0.0%, 32=0.0%, 64=0.0%, >=64=0.0%
+     issued rwts: total=524288,0,0,0 short=0,0,0,0 dropped=0,0,0,0
+     latency   : target=0, window=0, percentile=100.00%, depth=1
+
+Run status group 0 (all jobs):
+   READ: bw=40.3MiB/s (42.3MB/s), 40.3MiB/s-40.3MiB/s (42.3MB/s-42.3MB/s), io=4096MiB (4295MB), run=101621-101621msec

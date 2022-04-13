@@ -32,13 +32,19 @@ EBS 最適化インスタンスの諸元値
 
 
 EBSの諸元値
-|ボリュームタイプ|ボリュームあたりの最大 IOPS (16 KiB I/O)|ボリュームあたりの最大スループット|
-|:---|:---|:---|
-|GP3|16,000|1,000 MiB/秒|
-|GP2|16,000|250 MiB/秒* |
+|ボリュームタイプ|ボリュームあたりの最大 IOPS (16 KiB I/O)|ボリュームあたりの最大スループット|備考|
+|:---|:---|:---|:---|
+|GP3|16,000|1,000 MiB/秒||
+|GP2|16,000|250 MiB/秒* ||
+|IO2|64,000|1,000  MiB/秒* ||
+|IO2BE|256,000|4,000  MiB/秒 |参考値。m4,i3では選択不可|
 
 今回はGP2に2,000MB割り当てているので、固定で250MiB/秒の性能となるが、一般的には下記の条件が付く。  
 >スループットの制限は、ボリュームサイズに応じて 128 MiB/秒〜250 MiB/秒です。170 GiB 以下のボリュームの最大スループットは 128 MiB/秒です。170 GiB より大きく 334 GiB より小さいボリュームは、バーストクレジットを利用できる場合、最大スループット 250 MiB/秒を提供します。334 GiB 以上のボリュームであれば、バーストクレジットに関係なく 250 MIB/S を配信できます。作成された日が 2018 年 12 月 3 日以前であり、作成後に変更されていない gp2 ボリュームの場合は、 そのボリュームを変更しない限り、完全なパフォーマンスが得られない場合があります
+
+
+特定のインスタンスタイプでio2を指定するとio2beになる。
+> io2 Block Express ボリュームは、R5b、X2idn、X2iedn インスタンスでのみサポートされます。これらのインスタンスにアタッチされた io2 ボリュームは、起動中または起動後に自動的に Block Express で実行されます。
 
 https://aws.amazon.com/jp/ec2/instance-types/  
 https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/storage-optimized-instances.html  
@@ -48,7 +54,7 @@ https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ebs-optimized.html
 
 ## 使用DISKデバイスについて
 
-|ドライブ|EBS|用途|初期/最大サイズ(GB)|Path|PIOPS|備考|
+|ドライブ|EBS|用途|DAT初期/最大サイズ(GB)|Path|PIOPS|備考|
 |:---|:---|:---|:---|:---|:---|:---|
 |H|GP3|IRIS本体|N/A|H:\InterSystems\IRIS|6000|WIJ,temp|
 |I|GP3|DAT|10/10|I:\DBGP3\IRIS.DAT|6000||
@@ -58,7 +64,7 @@ https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ebs-optimized.html
 |L|GP2|DAT|10/10|K:\DBGP2\IRIS.DAT|N/A|6000 IOPS|
 |M|GP3|DAT|10/10|M:\DBGP3M\IRIS.DAT|6000||
 |N|NVMe|DAT|48/|N:\ZRANREAD\IRIS.DAT||RANREADで使用,i3.xlarge使用時|
-
+|N|IO2|DAT|10/10|N:\DBIO2\IRIS.DAT|6000|io2使用時|
 
 > GP2のIOPSは3 IOPS/GB
 
@@ -155,6 +161,17 @@ Iドライブ(GP3)
 |write|4|1|4512|35.3||
 |write|1|8|6111|47.7||
 
+Iドライブ(IO2)
+|rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
+|:---|:---|:---|:---|:---|:---|
+|write|1|1|1662|13.0|1JobではMAXまで到達しないがIOPSは向上|
+|write|1|2|1722|13.5||
+|write|1|4|5899|46.1||
+|write|4|1|5721|44.7||
+|write|1|8|6136|47.9||
+
+> 単体JOBでの性能が改善する(よりLatencyが少ない)と期待しての計測
+
 i3.xlargeでの計測値　　
 Nドライブ(NVMe)
 |rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
@@ -178,7 +195,7 @@ DBGP3M>k ^data1
 DBGP3M>D DISABLE^%NOJRN k data s $P(data,"a",256)="a" F i=1:1:8834947 { S ^data1(i)=data }
 ```
 これらの処理が継続している間にWindows Perfmonから各指標を目視。
-> 目視なので精度はいまひとつ。
+> 目視なので計測精度はいまひとつ。
 
 - m4.xlargeの場合
 
@@ -188,6 +205,7 @@ DBGP3M>D DISABLE^%NOJRN k data s $P(data,"a",256)="a" F i=1:1:8834947 { S ^data1
 | I | DAT | 93.9 | 14.1 |179 |28|I/Oピーク時に帯域が飽和|
 | K | DAT | 93.8 | 13.8 |179 |27||
 | M | DAT | 93.8 | 13.8 |179 |27||
+
 
 インスタンスの最大スループットが93.75 MB/Sなので、WIJ及び各DATが配置されたディスクのMB/Sが(IOPS上限よりも先に)上限に達しているものと理解できる。
 > WIJを配置したディスクのMAX MB/Sが111.6に達している理由は不明。計測誤差？
@@ -245,6 +263,16 @@ Iドライブ(GP3)
 |read|4|1|4866|38.0||
 |read|1|8|6115|47.8||
 
+Iドライブ(io2)
+|rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
+|:---|:---|:---|:---|:---|:---|
+|read|1|1|4156|32.5|GP3と比べて1 JOB性能も向上|
+|read|1|2|5462|42.7||
+|read|1|4|5159|40.3||
+|read|4|1|5171|40.4||
+|read|8|1|6133|47.9||
+
+
 GP2,GP3共に、期待通りのIOPS(6,000)前後に達している。全般にGP2のほうがGP3よりやや高IOPSになっている傾向がみられる。
 
 i3.xlargeでの計測値　　
@@ -263,19 +291,18 @@ Nドライブ(NVMe)
 
 #### IRIS
 
-IRIS 32 MB Global Buffer (Global Bufferの最小サイズ)  
-
-下記コマンドにて、10GBのデータベースがあふれる程度のグローバル(4個)で満たす。
+事前準備として、下記コマンドにて、10GB(10,240MB)のデータベースがあふれる程度のグローバル(4個)で満たしておく。
 ```
 DBGP3>s $P(data,"a",256)="a"
-DBGP3>F i=1:1 { S ^data(i)=data IF (i#10000)=0 { W i,!  } }
+DBGP3>D DISABLE^%NOJRN　F i=1:1 { S ^data(i)=data If (i#10000)=0 { W i,!  } }
           ^
 <FILEFULL> ^data(35339791),i:\dbgp3\
 DBGP3>w 35339791/4
 8834947.75
-DBGP3>D DISABLE^%NOJRN
-DBGP3>k ^data F i=1:1:8834947 { S ^data1(i)=data,^data2(i)=data,^data3(i)=data,^data4(i)=data    IF (i#10000)=0 { W i,!  } }
+DBGP3>D DISABLE^%NOJRN k ^data F i=1:1:8834947 { S ^data1(i)=data,^data2(i)=data,^data3(i)=data,^data4(i)=data If (i#10000)=0 { W i,! } }
 ```
+
+IRIS 32 MB Global Buffer (Global Bufferの最小サイズ)  
 
 CASE 1) グローバル1個をシーケンシャルにREAD。  
 ```
@@ -301,12 +328,14 @@ Process #4
 DBGP3>F i=1:1:8834947 { S data=^data4(i) }
 ```
 
-結果
+結果  
+Iドライブ(GP3)
 |rw| numjobs| QUE Len | IOPS|備考|
 |:---|:---|:---|:---|:---|
 | read | 1 | 1 | 1650| CASE 1 |
 | read | 2 | 2 | 3210| CASE 2 |
 | read | 4 | 4 | 6120| CASE 3 |
+
 
 READ性能がリニアに向上。IRISのREAD単位は8KB固定なので、(WRITEの場合とは異なり)IOPS上限で頭打ちとなる。
 
@@ -324,11 +353,17 @@ Iドライブ(GP3)
 |:---|:---|:---|:---|:---|:---|
 |rndr|1|8|6063|47.4||
 
+Iドライブ(IO2)
+|rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
+|:---|:---|:---|:---|:---|:---|
+|rndr|1|8|6060|47.3||
+
+
 #### IRIS
 
 IRIS　RANREADを使用したREAD計測を実施。  
 https://community.intersystems.com/post/random-read-io-storage-performance-tool  
-IRISのキャッシュの影響を受けないViewコマンドでデータベースを読み込むため、ディスクの読み込み性能を比較するのに有益なツール。
+IRISのキャッシュの影響を受けないViewコマンドでデータベースを読み込むため、Global Bufferのサイズの影響を受けない。ディスクの読み込み性能を比較するのに有益なツール。
 
 ##### 事前準備
 
@@ -339,7 +374,7 @@ USER>do ##class(PerfTools.RanRead).Setup("I:\ZRANREAD","ZRANREAD",48,1)
 ```
 
 ##### 計測実行
-並列実行するジョブ数4、繰り返し回数30000を指定。
+並列実行するジョブ数1,4,8,16、繰り返し回数30000を指定。
 ```
 USER>do ##class(PerfTools.RanRead).Run("I:\ZRANREAD",4,30000)
  
@@ -363,13 +398,22 @@ FROM PerfTools.RanRead
 GROUP BY Batch
 ```
 
-m4.xlargeの場合
+m4.xlarge+GP3の場合
 ```
-RunDate RunTime Database        Iterations      Processes       ResponseTimeIOPS
+RunDate RunTime Database        Iterations      Processes       ResponseTime  IOPS
 66203   45046   I:\ZRANREAD\    30000   4       .67     6011
 66203   45222   I:\ZRANREAD\    30000   8       1.3     6136
 66203   45290   I:\ZRANREAD\    30000   16      2.6     6144
 66203   45452   I:\ZRANREAD\    30000   1       .63     1597
+```
+
+m4.xlarge+IO2の場合
+```
+RunDate RunTime Database        Iterations      Processes       ResponseTime  IOPS
+66212	49732	I:\ZRANREAD\	30000	16	2.6	6147
+66212	50086	I:\ZRANREAD\	30000	8	1.3	6135
+66212	50140	I:\ZRANREAD\	30000	4	.66	6093
+66212	50169	I:\ZRANREAD\	30000	1	.63	1579
 ```
 
 i3.xlarge(DBにインスタンスストアボリュームを使用)の場合 
@@ -386,8 +430,12 @@ RunDate	RunTime	Database	Iterations	Processes	ResponseTime	IOPS
 |:---|:---|:---|:---|:---|:---|:---|
 |m4.xlarge| 1 | 30000 | 1 | 1597| 0.63||
 |m4.xlarge| 4 | 30000 | 4 | 6011| 0.67 |IOPSが飽和|
-|m4.xlarge| 8 | 30000 | 8 | 6136| 1.3 ||
-|m4.xlarge| 16 | 30000 | 16 | 6144| 2.6||
+|m4.xlarge| 8 | 30000 | 8 | 6136| 1.3 |IOPSが飽和|
+|m4.xlarge| 16 | 30000 | 16 | 6144| 2.6|IOPSが飽和|
+|m4.xlarge(IO2)| 1 | 30000 || 1579 | 0.63 | GP3/1 JOBと比べてほぼ改善見られず|
+|m4.xlarge(IO2)| 4 | 30000 || 6093 | 0.66 | IOPSが飽和|
+|m4.xlarge(IO2)| 8 | 30000 || 6135 | 1.30 | IOPSが飽和|
+|m4.xlarge(IO2)| 16 | 30000 || 6147 | 2.60 | IOPSが飽和|
 |i3.xlarge| 1 | 30000 |  | 5882| 0.17||
 |i3.xlarge| 4 | 30000 |  | 21739| 0.18 ||
 |i3.xlarge| 8 | 30000 |  | 40176| 0.20 ||
@@ -409,6 +457,12 @@ Iドライブ(GP3)
 |rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
 |:---|:---|:---|:---|:---|:---|
 |rndw|1|8|4022|31.4||
+
+Iドライブ(IO2)
+|rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
+|:---|:---|:---|:---|:---|:---|
+|rndw|1|8|4026|31.5||
+
 
 i3.xlargeでの計測値　　
 Nドライブ(NVMe)
