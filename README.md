@@ -411,13 +411,7 @@ RunDate RunTime Database        Iterations      Processes       ResponseTime  IO
 ```
 
 m4.xlarge+IO2の場合
-```
-RunDate RunTime Database        Iterations      Processes       ResponseTime  IOPS
-66212	49732	I:\ZRANREAD\	30000	16	2.6	6147
-66212	50086	I:\ZRANREAD\	30000	8	1.3	6135
-66212	50140	I:\ZRANREAD\	30000	4	.66	6093
-66212	50169	I:\ZRANREAD\	30000	1	.63	1579
-```
+
 
 i3.xlarge(DBにインスタンスストアボリュームを使用)の場合 
 ```
@@ -435,10 +429,6 @@ RunDate	RunTime	Database	Iterations	Processes	ResponseTime	IOPS
 |m4.xlarge| 4 | 30000 | 4 | 6011| 0.67 |IOPSが飽和|
 |m4.xlarge| 8 | 30000 | 8 | 6136| 1.3 |IOPSが飽和|
 |m4.xlarge| 16 | 30000 | 16 | 6144| 2.6|IOPSが飽和|
-|m4.xlarge(IO2)| 1 | 30000 || 1579 | 0.63 | GP3/1 JOBと比べてほぼ改善見られず|
-|m4.xlarge(IO2)| 4 | 30000 || 6093 | 0.66 | IOPSが飽和|
-|m4.xlarge(IO2)| 8 | 30000 || 6135 | 1.30 | IOPSが飽和|
-|m4.xlarge(IO2)| 16 | 30000 || 6147 | 2.60 | IOPSが飽和|
 |i3.xlarge| 1 | 30000 |  | 5882| 0.17||
 |i3.xlarge| 4 | 30000 |  | 21739| 0.18 ||
 |i3.xlarge| 8 | 30000 |  | 40176| 0.20 ||
