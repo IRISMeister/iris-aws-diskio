@@ -164,7 +164,7 @@ Iドライブ(GP3)
 |write|4|1|4512|35.3||
 |write|1|8|6111|47.7||
 
-Iドライブ(IO2)
+Nドライブ(IO2)
 |rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
 |:---|:---|:---|:---|:---|:---|
 |write|1|1|1662|13.0|1JobではMAXまで到達しないがIOPSは向上|
@@ -173,7 +173,7 @@ Iドライブ(IO2)
 |write|4|1|5721|44.7||
 |write|1|8|6136|47.9||
 
-> 単体JOBでの性能が改善する(よりLatencyが少ない)と期待しての計測
+> 単体JOBでの性能が改善する(よりLatencyが少ない)と期待しての計測。MAX IOPSの比率はGP2:IO2=1:4なので、劇的な高速化を期待したが、そうはならない模様。
 
 i3.xlargeでの計測値　　
 Nドライブ(NVMe)
@@ -240,7 +240,6 @@ CASE 2) CASE 1のジャーナルあり版。
 
 ランダムアクセスでの更新であれば、書き込み先のブロックは非連続となるため、IOPSは増えるはず。それを試すためにランダムWRITEのCASE 1を実施。
 
-
 ### シーケンシャルREAD
 
 #### fio
@@ -266,7 +265,7 @@ Iドライブ(GP3)
 |read|4|1|4866|38.0||
 |read|1|8|6115|47.8||
 
-Iドライブ(io2)
+Nドライブ(IO2)
 |rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
 |:---|:---|:---|:---|:---|:---|
 |read|1|1|4156|32.5|GP3と比べて1 JOB性能も向上|
@@ -356,7 +355,7 @@ Iドライブ(GP3)
 |:---|:---|:---|:---|:---|:---|
 |rndr|1|8|6063|47.4||
 
-Iドライブ(IO2)
+Nドライブ(IO2)
 |rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
 |:---|:---|:---|:---|:---|:---|
 |rndr|1|8|6060|47.3||
@@ -411,6 +410,8 @@ RunDate RunTime Database        Iterations      Processes       ResponseTime  IO
 ```
 
 m4.xlarge+IO2の場合
+```
+```
 
 
 i3.xlarge(DBにインスタンスストアボリュームを使用)の場合 
@@ -441,6 +442,8 @@ RunDate	RunTime	Database	Iterations	Processes	ResponseTime	IOPS
 
 #### fio
 
+m4.xlargeでの計測値　　
+
 Lドライブ(GP2)
 |rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
 |:---|:---|:---|:---|:---|:---|
@@ -451,11 +454,13 @@ Iドライブ(GP3)
 |:---|:---|:---|:---|:---|:---|
 |rndw|1|8|4022|31.4||
 
-Iドライブ(IO2)
+Nドライブ(IO2)
 |rw|iodepth|numjobs|IOPS|BW(MiB/s)|備考|
 |:---|:---|:---|:---|:---|:---|
 |rndw|1|8|4026|31.5||
 
+  write: IOPS=5011, BW=39.2MiB/s (41.1MB/s)(8192MiB/209239msec); 0 zone resets
+  
 
 i3.xlargeでの計測値　　
 Nドライブ(NVMe)
@@ -465,7 +470,7 @@ Nドライブ(NVMe)
 
 #### IRIS
 
-IRISの場合、ランダムWRITE時は必ずランダムREADを伴うので、fioによる計測とは単純比較できない事に留意。
+IRISの場合、ランダムWRITE時は必ず***ランダムREADを伴う***ので、fioによる計測とは単純比較できない事に留意。
 
 CASE 1) シーケンシャルWRITEのCASE 2実施後に実施する。サイズが変わらないランダムアクセスの更新を行う。
 
