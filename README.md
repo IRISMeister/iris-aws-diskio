@@ -305,6 +305,7 @@ DBGP3>D DISABLE^%NOJRN k ^data F i=1:1:8834947 { S ^data1(i)=data,^data2(i)=data
 ```
 
 IRIS 32 MB Global Buffer (Global Bufferの最小サイズ)  
+計測の際は、下記コマンド開始後にperfmonをクリアし記録開始。100秒後にperfmonを「画面の固定」し値を記録。  
 
 CASE 1) グローバル1個をシーケンシャルにREAD。  
 ```
@@ -332,14 +333,33 @@ DBGP3>F i=1:1:8834947 { S data=^data4(i) }
 
 結果  
 Iドライブ(GP3)
-|rw| numjobs| QUE Len | IOPS|備考|
-|:---|:---|:---|:---|:---|
-| read | 1 | 1 | 1650| CASE 1 |
-| read | 2 | 2 | 3210| CASE 2 |
-| read | 4 | 4 | 6120| CASE 3 |
+|rw| numjobs| AVG QUE Len | AVG IOPS|BW(MB/s)|備考|
+|:---|:---|:---|:---|:---|:---|
+| read | 1 | 0.96 | 1506| 12.3 |CASE 1 |
+| read | 2 | 1.9 | 3005| 24.6|CASE 2 |
+| read | 4 | 3.8 | 6051| 49.6|CASE 3 |
 
 
 READ性能がリニアに向上。IRISのREAD単位は8KB固定なので、(WRITEの場合とは異なり)IOPS上限で頭打ちとなる。
+
+
+同様に、$Order()を使用したREADを計測。各processで実施したコマンドは下記の通り。
+
+```
+DBGP3>Set i="" F { S i=$O(^data1(i),1,rec) q:i="" }
+DBGP3>Set i="" F { S i=$O(^data2(i),1,rec) q:i="" }
+DBGP3>Set i="" F { S i=$O(^data3(i),1,rec) q:i="" }
+DBGP3>Set i="" F { S i=$O(^data4(i),1,rec) q:i="" }
+```
+
+結果  
+Iドライブ(GP3)
+|rw| numjobs| AVG QUE Len | AVG IOPS|BW(MB/s)|備考|
+|:---|:---|:---|:---|:---|:---|
+| read | 1 | 0.94 | 1478| 12.1|CASE 1 |
+| read | 2 | 1.8 | 3025| 24.8|CASE 2 |
+| read | 4 | 3.8 | 6028| 49.4|CASE 3 |
+
 
 ### ランダムREAD
 
@@ -428,7 +448,7 @@ RunDate	RunTime	Database	Iterations	Processes	ResponseTime	IOPS
 
 ##### 結果
 |インスタンスタイプ|EBS| numjobs| Iterate  | IOPS|平均応答時間(ms)|備考|
-|:---|:---|:---|:---|:---|:---|:---|:---|
+|:---|:---|:---|:---|:---|:---|:---|
 |m4.xlarge|GP3| 1 | 30000 | 1597| 0.63||
 |m4.xlarge|GP3| 4 | 30000 | 6011| 0.67 |IOPSが飽和|
 |m4.xlarge|GP3| 8 | 30000 | 6136| 1.3 ||
