@@ -1,0 +1,2 @@
+\PhysicalDisk(4 H:)\Disk Read Bytes/sec
+\PhysicalDisk(4 H:)\Disk Write Bytes/sec
