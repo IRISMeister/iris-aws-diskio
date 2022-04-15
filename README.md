@@ -597,15 +597,15 @@ https://docs.intersystems.com/iris20211/csp/docbookj/DocBook.UI.Page.cls?KEY=GCM
 ```
 mgstatの出力例は[こちら](misc/mgstat.csv)。
 
-前出のperfmonのDisk Write Bytes/sec値とmgstatのPhyWrs値は単位が異なる(mgstatのPhyWrsは単位はBlocks/sec)。これを補正(PhyWrs*8192)して時系列を合わせてプロットすると、両者が同じ指標とみなせることが分かる。
+前出のperfmonのDisk Write Bytes/sec値とmgstatのPhyWrs値は単位が異なる(mgstatのPhyWrsは単位はBlocks/sec)。これをIRISのデータベースブロックサイズ(デフォルトで8192 bytes)で計算(PhyWrsx8192)して時系列を合わせてプロットすると、両者が同じ指標とみなせることが分かる。
 
 ![phywrs-and-writebytes](images/phywrs-and-writebytes.png)
 
-これに相当するCloudWatchの指標はVolumeWriteBytes/合計。ただし、CloudWatchの計測単位は詳細モニタリングを有効化しても、最短で1分(mgstat,perfmonは1秒)なので、正確な負荷状況を表現できない(同じ様な「極端な山と谷の」グラフにならない)事がある。  
+これに相当するCloudWatchの指標はVolumeWriteBytes/合計。ただし、CloudWatchの収集間隔は詳細モニタリングを有効化しても、最短で1分(mgstat,perfmonは1秒)なので、正確な負荷状況を表現できない(同じ様な「極端な山と谷の」グラフにならない)事がある。  
 
 > パフォーマンス関連の調査時にmgstatやperfmon(あるいは後述のSystemPerformanceツール)の取得をお願いする所以
 
-mgstatの最大収拾期間は10秒(それ以上を指定しても10になる)。下記の出力で、PhyWrs=10752とは、10秒間の平均値なので、「VolumeWriteBytes/合計」と比較するには、この10秒間のPhyWrs回数を補正(10752x10x8192)する必要がある。さらに、これを1分ごとにグループ集計すれば、VolumeWriteByteと一致するグラフとなる。
+mgstatの最大収集間隔は10秒(それ以上を指定しても10になる)。下記の出力で、PhyWrs=10752とは、10秒間の平均値なので、「VolumeWriteBytes/合計」と比較するには、この10秒間のPhyWrs回数を補正(10752x10x8192)する必要がある。さらに、これを1分ごとにグループ集計すれば、VolumeWriteByteと一致するグラフとなる。
 ```
 %SYS>d dsp132^mgstat(10,100000)
 Date,       Time    ,  Glorefs, GRratio,  PhyRds, Gloupds, Rourefs,  PhyWrs,   WDQsz, WDphase, Jrnwrts,  WDpass,  IJUcnt, IJULock
