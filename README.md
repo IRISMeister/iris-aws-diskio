@@ -386,15 +386,23 @@ Nドライブ(IO2)
 
 #### IRIS
 
-IRIS　RANREADを使用したREAD計測を実施。  
+IRIS RANREADを使用したREAD計測を実施。  
 https://community.intersystems.com/post/random-read-io-storage-performance-tool  
 IRISのキャッシュの影響を受けないViewコマンドでデータベースを読み込むため、Global Bufferのサイズの影響を受けない。ディスクの読み込み性能を比較するのに有益なツール。
 
 ##### 事前準備
 
-48GBのデータベースを作成。ログレベル1を指定。
 ```
+$ git clone https://github.com/intersystems/random-read-performance-tool
+あるいは
+zipでダウンロード。
+
 USER>do $SYSTEM.OBJ.Load("C:\random-read-performance-tool-master\PerfTools.RanRead.xml","ck")
+```
+
+> Create an empty (pre-expanded) database called ZRANREAD approximately twice the size of the memory of the physical host to be tested
+とあるので、32GBのデータベースを作成。ログレベル1を指定。
+```
 USER>do ##class(PerfTools.RanRead).Setup("I:\ZRANREAD","ZRANREAD",48,1)
 ```
 
@@ -414,7 +422,7 @@ Random read background jobs finished.
 Calculated IOPS = 6006
 ```
 
-##### 結果の閲覧
+##### 結果の閲覧方法
 ```
 SELECT RunDate,RunTime,Database,Iterations,Processes,
     {fn ROUND(AVG(ResponseTime),2)} As ResponseTime,
@@ -423,36 +431,19 @@ FROM PerfTools.RanRead
 GROUP BY Batch
 ```
 
-m4.xlarge+GP3の場合
-```
-RunDate RunTime Database        Iterations      Processes       ResponseTime  IOPS
-66203   45046   I:\ZRANREAD\    30000   4       .67     6011
-66203   45222   I:\ZRANREAD\    30000   8       1.3     6136
-66203   45290   I:\ZRANREAD\    30000   16      2.6     6144
-66203   45452   I:\ZRANREAD\    30000   1       .63     1597
-```
-
-m4.xlarge+IO2の場合
-```
-```
-
-
-i3.xlarge(DBにNVMeインスタンスストアボリュームを使用)の場合 
-```
-RunDate	RunTime	Database	Iterations	Processes	ResponseTime	IOPS
-04/06/2022	14:01:27	N:\ZRANREAD\	30000	1	0.17	5882
-04/06/2022	14:02:27	N:\ZRANREAD\	30000	4	0.18	21739
-04/06/2022	14:02:45	N:\ZRANREAD\	30000	8	0.20	40176
-04/06/2022	14:04:03	N:\ZRANREAD\	30000	16	0.24	67212
-```
-
 ##### 結果
 |インスタンスタイプ|EBS| numjobs| Iterate  | IOPS|平均応答時間(ms)|備考|
 |:---|:---|:---|:---|:---|:---|:---|
-|m4.xlarge|GP3| 1 | 30000 | 1597| 0.63||
-|m4.xlarge|GP3| 4 | 30000 | 6011| 0.67 |IOPSが飽和|
-|m4.xlarge|GP3| 8 | 30000 | 6136| 1.3 ||
-|m4.xlarge|GP3| 16 | 30000 | 6144| 2.6||
+|m4.xlarge|GP3| 1 | 30000 | 927| 1.08||
+|m4.xlarge|GP3| 2 | 30000 | 1938| 1.03 ||
+|m4.xlarge|GP3| 4 | 30000 | 4054| 0.99 ||
+|m4.xlarge|GP3| 8 | 30000 | 6127| 1.31 |IOPSが飽和|
+|m4.xlarge|GP3| 16 | 30000 | 6135| 2.61||
+|m4.xlarge|IO2| 1 | 30000 | 1524| 0.66||
+|m4.xlarge|IO2| 2 | 30000 | 3028| 0.66 ||
+|m4.xlarge|IO2| 4 | 30000 | 6118| 0.65 |IOPSが飽和|
+|m4.xlarge|IO2| 8 | 30000 | 6136| 1.30 ||
+|m4.xlarge|IO2| 16 | 30000 | 6502| 2.46||
 |i3.xlarge|NVMe| 1 | 30000 | 5882| 0.17||
 |i3.xlarge|NVMe| 4 | 30000 | 21739| 0.18 ||
 |i3.xlarge|NVMe| 8 | 30000 | 40176| 0.20 ||
@@ -460,6 +451,7 @@ RunDate	RunTime	Database	Iterations	Processes	ResponseTime	IOPS
 |i3.xlarge|NVMe| 32 | 30000 | 99608| 0.32||
 |i3.xlarge|NVMe| 64 | 30000 | 96304| 0.67|CPUが飽和|
 
+> NVMeはEBSではなく、i3.xlarge(DBにNVMeインスタンスストアボリュームを使用)の場合 
 
 ### ランダムWRITE
 
